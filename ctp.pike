@@ -8,16 +8,18 @@
  *
  */
 
+
+// Global variables
+int to_chase;
+int result_a, result_b;
+array(int) a, b;
+
  // Main program
  int main(int argc, array(string) argv)
  {
- 	int to_chase = 231;
- 	int result_a, result_b;
- 	array(int) a;
- 	array(int) b;
-
  	float seconds_to_execute = gauge
  	{
+ 		to_chase = 231;
 		a = Array.sort(({ 1, 23, 45, 66, 84, 113, 145, 178, 205, 210, 221, 250, 264, 300 }));
 	 	b = Array.sort(({ 5, 31, 40, 52, 73, 103, 126, 162, 195, 214, 225, 241, 256, 267 }));
 	 	
@@ -26,18 +28,50 @@
 	 		write("Invalid to_chase number.\n");
 	 		return 0;
 	 	}
-
-	 	// Creem dos threads per cada binary search
-	 	result_a = find_closest(a, sizeof(a), to_chase);
-	 	result_b = find_closest(b, sizeof(b), to_chase);
 	};
-
-	write("Chase pair: [" + result_a + ", " + result_b + "]\n");
-	write("Seconds to search: " + seconds_to_execute + "\n");
+	write("Seconds to sort: " + seconds_to_execute + "\n");
 
 
- 	return 0;
+	seconds_to_execute = gauge
+	{
+		thread_version();	 
+	};
+	write("Seconds to execute thread version: " + seconds_to_execute + "\n");
+
+
+	seconds_to_execute = gauge
+	{
+		thread_version();	 
+	};
+	write("Seconds to execute sequential version: " + seconds_to_execute + "\n");
+
+	return 0;
  }
+
+// Function to resolve the problem with threads
+void thread_version()
+{	 	
+	// Create two threads for each array
+ 	array(array(function(:void)|array)) fun_args = 
+ 	({
+ 		({ find_closest, ({ a, sizeof(a), to_chase }) }),
+ 		({ find_closest, ({ b, sizeof(b), to_chase }) })
+ 	});
+
+	object result = Thread.Farm()->run_multiple(fun_args);
+
+ 	array(int) res = result();
+
+	write("Chase pair: [" + res[0] + ", " + res[1] + "]\n");
+}
+
+// Function to resolve the problem sequentially
+void sequential_version()
+{
+	result_a = find_closest(a, sizeof(a), to_chase);
+ 	result_b = find_closest(b, sizeof(b), to_chase);
+	write("Chase pair: [" + result_a + ", " + result_b + "]\n");
+}
 
 // Returns element closest to to_chase in arr
 int find_closest(array(int) arr, int n, int to_chase) 
@@ -67,7 +101,7 @@ int find_closest(array(int) arr, int n, int to_chase)
             i = mid + 1;  
         } 
     } 
-  
+
     // Only single element left after search 
     return arr[mid]; 
 } 
