@@ -29,42 +29,10 @@ int main(int argc, array(string) argv)
 
 	read_file("logs.txt");
 
-	write("################################################################################\n");
-	write("#################################### INFO ######################################\n");
-	write("################################################################################\n");
- 	write("\t\t\t * Size of array A: " + sizeof(a) + "\n");
- 	write("\t\t\t * Size of array B: " + sizeof(b) + "\n");
- 	write("\t\t\t * Chase number: " + to_chase + "\n");
+	sort_sets();
 
- 	float seconds_to_execute = gauge
- 	{
-		a = Array.sort(a);
-	 	b = Array.sort(b);
-	 	
-	 	if(to_chase < a[0] || to_chase < b[0] || to_chase > a[-1] || to_chase > b[-1])
-	 	{
-	 		write("\t\t\t * Invalid to_chase number.\n");
-	 		write("################################################################################\n\n");
-	 		exit(0);
-	 	}
-	};
-	write("\t\t\t * Seconds to sort: " + seconds_to_execute + "\n");
+	thread_version();	 
 
-
-	seconds_to_execute = gauge
-	{
-		thread_version();	 
-	};
-	write("\t\t\t * Seconds to execute thread version: " + seconds_to_execute + "\n");
-
-
-	seconds_to_execute = gauge
-	{
-		sequential_version();	 
-	};
-	write("\t\t\t * Seconds to execute sequential version: " + seconds_to_execute + "\n");
-	write("################################################################################\n\n");
-	
 	return 0;
  }
 
@@ -76,6 +44,30 @@ void read_file(string filename)
 
 	a = convert_to_int_array(((split_data[0])[2..sizeof(split_data[0])-2]) / ",");
 	b = convert_to_int_array(((split_data[1])[2..sizeof(split_data[1])-2]) / ",");
+
+	write("################################################################################\n");
+	write("#################################### INFO ######################################\n");
+	write("################################################################################\n");
+ 	write("\t\t * Size of array A: " + sizeof(a) + "\n");
+ 	write("\t\t * Size of array B: " + sizeof(b) + "\n");
+ 	write("\t\t * Chase number: " + to_chase + "\n");
+}
+
+// Function to sort the 2 sets
+void sort_sets()
+{
+	float start_time = time(time());
+
+	a = Array.sort(a);
+ 	b = Array.sort(b);
+ 	if(to_chase < a[0] || to_chase < b[0] || to_chase > a[-1] || to_chase > b[-1])
+ 	{
+ 		write("\t\t * Invalid to_chase number.\n");
+ 		write("################################################################################\n\n");
+ 		exit(0);
+ 	}
+
+ 	write("\t\t * Seconds to sort: " + (time(time()) - start_time) + "\n");
 }
 
 // Function to convert the string parsed array into int array
@@ -93,6 +85,8 @@ array(int) convert_to_int_array(array(string) arr)
 // Function to resolve the problem with threads
 void thread_version()
 {	 	
+	float start_time = time(time());
+
 	// Create two threads for each array
  	array(array(function(:void)|array)) fun_args = 
  	({
@@ -102,17 +96,23 @@ void thread_version()
 
 	object result = Thread.Farm()->run_multiple(fun_args);
 
- 	array(int) res = result();
+ 	array(int) res = result(); // Thread function to wait the results
 
-	write("\t\t\t * Chase pair: [" + res[0] + ", " + res[1] + "]\n");
+	write("\t\t * Chase pair: [" + res[0] + ", " + res[1] + "]\n");
+	write("\t\t * Seconds to execute thread version: " + (time(time()) - start_time) + "\n");
+	write("################################################################################\n\n");
 }
 
 // Function to resolve the problem sequentially
 void sequential_version()
 {
+	float start_time = time(time());
+
 	result_a = find_closest(a, sizeof(a), to_chase);
  	result_b = find_closest(b, sizeof(b), to_chase);
-	write("\t\t\t * Chase pair: [" + result_a + ", " + result_b + "]\n");
+	write("\t\t * Chase pair: [" + result_a + ", " + result_b + "]\n");	
+	write("\t\t * Seconds to execute thread version: " + (time(time()) - start_time) + "\n");
+	write("################################################################################\n\n");
 }
 
 // Returns element closest to to_chase in arr
