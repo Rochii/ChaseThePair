@@ -5,6 +5,6 @@ Dado un número (número A) obtén el par de números más cercano (número B y 
 
 ## Información
 - Group name: Undefinedp
-- Cost: Log2N(sort) + log2N(Search) = 2log2N
+- Cost: NLog2N(sort) + log2N(Search) = Nlog2N
 - Time expend: 0.319445
 - Sets size: 1000000
